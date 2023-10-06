@@ -1,14 +1,11 @@
 package routes
 
 import (
-	"fmt"
+	"vault-server/handlers"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func CreateRoutes(api fiber.Router) {
-	api.Get("/hello", func(c *fiber.Ctx) error {
-		msg := fmt.Sprintf("Hello %v", c.IP())
-		return c.SendString(msg)
-	})
+	api.Get("/hello", handlers.Hello)
 }
