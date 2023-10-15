@@ -7,5 +7,5 @@ import (
 )
 
 func CreateRoutes(api fiber.Router) {
-	api.Get("/hello", handlers.Hello)
+	api.Get("/files/:token", handlers.Files)
 }
