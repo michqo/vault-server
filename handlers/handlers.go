@@ -6,17 +6,38 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Files(c *fiber.Ctx) error {
-	output, err := database.ListItems(c.Params("token") + "/")
+func GetObjects(c *fiber.Ctx) error {
+	token := c.Query("token")
+	if token == "" {
+		return fiber.ErrBadRequest
+	}
+	output, err := database.ListObjects(token + "/")
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
-	/* 	for _, item := range output.Contents {
-		fmt.Println("Name:         ", *item.Key)
-		fmt.Println("Last modified:", *item.LastModified)
-		fmt.Println("Size:         ", *item.Size)
-		fmt.Println("Storage class:", *item.StorageClass)
-		fmt.Println("")
-	} */
 	return c.JSON(output.Contents)
+}
+
+func GetObjectUrl(c *fiber.Ctx) error {
+	key := c.Query("key")
+	if key == "" {
+		return fiber.ErrBadRequest
+	}
+	url, err := database.GetObjectUrl(key)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+	return c.JSON(fiber.Map{"url": url})
+}
+
+func DeleteObject(c *fiber.Ctx) error {
+	key := c.Query("key")
+	if key == "" {
+		return fiber.ErrBadRequest
+	}
+	err := database.DeleteObject(key)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+	return c.SendStatus(200)
 }

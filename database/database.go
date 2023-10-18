@@ -3,6 +3,7 @@ package database
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -11,7 +12,7 @@ import (
 )
 
 var client *s3.S3
-var bucket string
+var bucket *string
 
 func CreateDatabase() {
 	sess, err := session.NewSession(&aws.Config{
@@ -22,17 +23,32 @@ func CreateDatabase() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bucket = os.Getenv("S3_BUCKET_NAME")
+	bucket = aws.String(os.Getenv("S3_BUCKET_NAME"))
 	client = s3.New(sess)
 }
 
-func ListItems(prefix string) (*s3.ListObjectsV2Output, error) {
+func ListObjects(prefix string) (*s3.ListObjectsV2Output, error) {
 	res, err := client.ListObjectsV2(&s3.ListObjectsV2Input{
-		Bucket: aws.String(bucket),
+		Bucket: bucket,
 		Prefix: aws.String(prefix),
 	})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return res, err
+}
+
+func GetObjectUrl(key string) (string, error) {
+	res, _ := client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket:                     bucket,
+		Key:                        aws.String(key),
+		ResponseContentDisposition: aws.String("attachment"),
+	})
+	url, err := res.Presign(60 * time.Minute)
+	return url, err
+}
+
+func DeleteObject(key string) error {
+	_, err := client.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: bucket,
+		Key:    aws.String(key),
+	})
+	return err
 }

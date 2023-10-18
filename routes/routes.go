@@ -7,5 +7,7 @@ import (
 )
 
 func CreateRoutes(api fiber.Router) {
-	api.Get("/files/:token", handlers.Files)
+	api.Get("/objects", handlers.GetObjects)
+	api.Get("/object-url", handlers.GetObjectUrl)
+	api.Delete("/object", handlers.DeleteObject)
 }
