@@ -28,16 +28,28 @@ func GetObjects(c *fiber.Ctx) error {
 	return c.JSON(objects)
 }
 
-func GetObjectUrl(c *fiber.Ctx) error {
+func ObjectUrl(c *fiber.Ctx) error {
+	urlType := c.Query("type")
 	key := c.Query("key")
-	if key == "" {
+	if urlType == "" || key == "" {
 		return fiber.ErrBadRequest
 	}
-	url, err := database.GetObjectUrl(key)
-	if err != nil {
-		return fiber.ErrInternalServerError
+	switch urlType {
+	case "GET":
+		url, err := database.GetObjectUrl(key)
+		if err != nil {
+			return fiber.ErrInternalServerError
+		}
+		return c.JSON(fiber.Map{"url": url})
+	case "PUT":
+		url, err := database.PutObjectUrl(key)
+		if err != nil {
+			return fiber.ErrInternalServerError
+		}
+		return c.JSON(fiber.Map{"url": url})
+	default:
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "Type not allowed"})
 	}
-	return c.JSON(fiber.Map{"url": url})
 }
 
 func DeleteObject(c *fiber.Ctx) error {

@@ -45,6 +45,15 @@ func GetObjectUrl(key string) (string, error) {
 	return url, err
 }
 
+func PutObjectUrl(key string) (string, error) {
+	res, _ := client.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: bucket,
+		Key:    aws.String(key),
+	})
+	url, err := res.Presign(5 * time.Minute)
+	return url, err
+}
+
 func DeleteObject(key string) error {
 	_, err := client.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: bucket,
