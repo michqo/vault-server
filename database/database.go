@@ -35,7 +35,7 @@ func ListObjects(prefix string) (*s3.ListObjectsV2Output, error) {
 	return res, err
 }
 
-func GetObjectUrl(key string) (string, error) {
+func ObjectGetUrl(key string) (string, error) {
 	res, _ := client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket:                     bucket,
 		Key:                        aws.String(key),
@@ -45,7 +45,7 @@ func GetObjectUrl(key string) (string, error) {
 	return url, err
 }
 
-func PutObjectUrl(key string) (string, error) {
+func ObjectPutUrl(key string) (string, error) {
 	res, _ := client.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: bucket,
 		Key:    aws.String(key),

@@ -36,13 +36,13 @@ func ObjectUrl(c *fiber.Ctx) error {
 	}
 	switch urlType {
 	case "GET":
-		url, err := database.GetObjectUrl(key)
+		url, err := database.ObjectGetUrl(key)
 		if err != nil {
 			return fiber.ErrInternalServerError
 		}
 		return c.JSON(fiber.Map{"url": url})
 	case "PUT":
-		url, err := database.PutObjectUrl(key)
+		url, err := database.ObjectPutUrl(key)
 		if err != nil {
 			return fiber.ErrInternalServerError
 		}
