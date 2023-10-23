@@ -50,7 +50,7 @@ func ObjectPutUrl(key string) (string, error) {
 		Bucket: bucket,
 		Key:    aws.String(key),
 	})
-	url, err := res.Presign(5 * time.Minute)
+	url, err := res.Presign(3 * time.Minute)
 	return url, err
 }
 
@@ -60,4 +60,24 @@ func DeleteObject(key string) error {
 		Key:    aws.String(key),
 	})
 	return err
+}
+
+func ObjectsSize(listObjectsInput *s3.ListObjectsV2Input) (int64, error) {
+	res, err := client.ListObjectsV2(listObjectsInput)
+	size := int64(0)
+	for _, object := range res.Contents {
+		size += *object.Size
+	}
+	return size, err
+}
+
+func BucketSize() (int64, error) {
+	return ObjectsSize(&s3.ListObjectsV2Input{Bucket: bucket})
+}
+
+func BucketPrefixSize(prefix string) (int64, error) {
+	return ObjectsSize(&s3.ListObjectsV2Input{
+		Bucket: bucket,
+		Prefix: aws.String(prefix),
+	})
 }
