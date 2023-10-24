@@ -2,8 +2,9 @@ package database
 
 import (
 	"log"
-	"os"
 	"time"
+
+	. "vault-server/cmd/config"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -14,16 +15,16 @@ import (
 var client *s3.S3
 var bucket *string
 
-func CreateDatabase() {
+func NewS3Client() {
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(os.Getenv("S3_REGION")),
-		Endpoint:    aws.String(os.Getenv("S3_ENDPOINT_URL")),
-		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ACCESS_KEY"), os.Getenv("S3_SECRET_KEY"), ""),
+		Region:      aws.String(Cfg.Region),
+		Endpoint:    aws.String(Cfg.Endpoint),
+		Credentials: credentials.NewStaticCredentials(Cfg.AccessKey, Cfg.SecretKey, ""),
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	bucket = aws.String(os.Getenv("S3_BUCKET_NAME"))
+	bucket = aws.String(Cfg.BucketName)
 	client = s3.New(sess)
 }
 
