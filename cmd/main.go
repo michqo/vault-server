@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"vault-server/database"
-	"vault-server/routes"
+	"vault-server/internal/database"
+	"vault-server/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"

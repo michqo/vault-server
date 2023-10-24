@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"vault-server/database"
+	"vault-server/internal/database"
 
 	"github.com/gofiber/fiber/v2"
 )

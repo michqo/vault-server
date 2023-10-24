@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"vault-server/handlers"
+	"vault-server/internal/handlers"
 
 	"github.com/gofiber/fiber/v2"
 )
