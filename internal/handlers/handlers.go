@@ -3,6 +3,8 @@ package handlers
 import (
 	"vault-server/internal/database"
 
+	. "vault-server/cmd/config"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -31,18 +33,33 @@ func GetObjects(c *fiber.Ctx) error {
 func ObjectUrl(c *fiber.Ctx) error {
 	urlType := c.Query("type")
 	key := c.Query("key")
-	if urlType == "" || key == "" {
+	token := c.Query("token")
+	if urlType == "" || key == "" || token == "" {
 		return fiber.ErrBadRequest
 	}
 	switch urlType {
 	case "GET":
-		url, err := database.ObjectGetUrl(key)
+		url, err := database.ObjectGetUrl(token + "/" + key)
 		if err != nil {
 			return fiber.ErrInternalServerError
 		}
 		return c.JSON(fiber.Map{"url": url})
 	case "PUT":
-		url, err := database.ObjectPutUrl(key)
+		size, err := database.BucketSize()
+		if err != nil {
+			return fiber.ErrInternalServerError
+		}
+		if size >= Cfg.MaxBucketSize {
+			return fiber.ErrInsufficientStorage
+		}
+		size2, err := database.BucketPrefixSize(token + "/")
+		if err != nil {
+			return fiber.ErrInternalServerError
+		}
+		if size2 >= Cfg.MaxFolderSize {
+			return fiber.ErrInsufficientStorage
+		}
+		url, err := database.ObjectPutUrl(token + "/" + key)
 		if err != nil {
 			return fiber.ErrInternalServerError
 		}

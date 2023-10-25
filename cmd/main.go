@@ -12,8 +12,8 @@ import (
 func main() {
 	config.LoadConfig()
 	database.NewS3Client()
-	app := fiber.New()
 
+	app := fiber.New()
 	api := app.Group("/v1")
 	routes.CreateRoutes(api)
 
