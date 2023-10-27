@@ -45,18 +45,12 @@ func ObjectUrl(c *fiber.Ctx) error {
 		}
 		return c.JSON(fiber.Map{"url": url})
 	case "PUT":
-		size, err := database.BucketSize()
-		if err != nil {
+		size, err1 := database.BucketSize()
+		size2, err2 := database.BucketPrefixSize(token + "/")
+		if err1 != nil || err2 != nil {
 			return fiber.ErrInternalServerError
 		}
-		if size >= Cfg.MaxBucketSize {
-			return fiber.ErrInsufficientStorage
-		}
-		size2, err := database.BucketPrefixSize(token + "/")
-		if err != nil {
-			return fiber.ErrInternalServerError
-		}
-		if size2 >= Cfg.MaxFolderSize {
+		if size >= Cfg.MaxBucketSize || size2 >= Cfg.MaxFolderSize {
 			return fiber.ErrInsufficientStorage
 		}
 		url, err := database.ObjectPutUrl(token + "/" + key)
