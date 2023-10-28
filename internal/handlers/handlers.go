@@ -9,10 +9,16 @@ import (
 )
 
 type Object struct {
-	Key          string
-	LastModified string
-	Size         int64
+	Key          string `json:"key"`
+	LastModified string `json:"lastModified"`
+	Size         int64  `json:"size"`
 }
+
+type ObjectUrlType struct {
+	Url string `json:"url"`
+}
+
+type ObjectUrlsBody []string
 
 func GetObjects(c *fiber.Ctx) error {
 	token := c.Query("token")
@@ -61,6 +67,23 @@ func ObjectUrl(c *fiber.Ctx) error {
 	default:
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "Type not allowed"})
 	}
+}
+
+func ObjectPutUrls(c *fiber.Ctx) error {
+	body := ObjectUrlsBody{}
+	err := c.BodyParser(&body)
+	if err != nil {
+		return err
+	}
+	urls := make([]ObjectUrlType, len(body))
+	for i, key := range body {
+		url, err := database.ObjectPutUrl(key)
+		if err != nil {
+			return fiber.ErrInternalServerError
+		}
+		urls[i] = ObjectUrlType{Url: url}
+	}
+	return c.JSON(fiber.Map{"urls": urls})
 }
 
 func DeleteObject(c *fiber.Ctx) error {
