@@ -7,6 +7,7 @@ import (
 	"vault-server/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -14,6 +15,8 @@ func main() {
 	database.NewS3Client()
 
 	app := fiber.New()
+	app.Use(cors.New())
+
 	api := app.Group("/v1")
 	routes.CreateRoutes(api)
 
