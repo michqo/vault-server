@@ -20,5 +20,5 @@ func main() {
 	api := app.Group("/v1")
 	routes.CreateRoutes(api)
 
-	log.Fatal(app.Listen(":8000"))
+	log.Fatal(app.Listen("127.0.0.1:8000"))
 }
