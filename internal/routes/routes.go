@@ -9,7 +9,7 @@ import (
 func CreateRoutes(api fiber.Router) {
 	api.Get("/objects", handlers.GetObjects)
 	api.Get("/object-url", handlers.ObjectUrl)
-	api.Post("/object-urls", handlers.ObjectPutUrls)
+	api.Post("/object-urls", handlers.ObjectUrls)
 	api.Delete("/object", handlers.DeleteObject)
 	api.Delete("/objects", handlers.DeleteObjects)
 }

@@ -14,6 +14,11 @@ type Object struct {
 	Size         int64  `json:"size"`
 }
 
+type UploadObject struct {
+	Key   string `json:"key"`
+	Token string `json:"token"`
+}
+
 type ObjectUrlType struct {
 	Url string `json:"url"`
 }
@@ -42,28 +47,31 @@ func GetObjects(c *fiber.Ctx) error {
 
 func ObjectUrl(c *fiber.Ctx) error {
 	urlType := c.Query("type")
-	key := c.Query("key")
-	token := c.Query("token")
-	if urlType == "" || key == "" || token == "" {
+	body := UploadObject{}
+	err := c.BodyParser(&body)
+	if err != nil {
+		return err
+	}
+	if urlType == "" || body.Key == "" || body.Token == "" {
 		return fiber.ErrBadRequest
 	}
 	switch urlType {
 	case "GET":
-		url, err := database.ObjectGetUrl(token + "/" + key)
+		url, err := database.ObjectGetUrl(body.Token + "/" + body.Key)
 		if err != nil {
 			return fiber.ErrInternalServerError
 		}
 		return c.JSON(fiber.Map{"url": url})
 	case "PUT":
 		size, err1 := database.BucketSize()
-		size2, err2 := database.BucketPrefixSize(token + "/")
+		size2, err2 := database.BucketPrefixSize(body.Token + "/")
 		if err1 != nil || err2 != nil {
 			return fiber.ErrInternalServerError
 		}
 		if size >= Cfg.MaxBucketSize || size2 >= Cfg.MaxFolderSize {
 			return fiber.ErrInsufficientStorage
 		}
-		url, err := database.ObjectPutUrl(token + "/" + key)
+		url, err := database.ObjectPutUrl(body.Token + "/" + body.Key)
 		if err != nil {
 			return fiber.ErrInternalServerError
 		}
@@ -73,7 +81,7 @@ func ObjectUrl(c *fiber.Ctx) error {
 	}
 }
 
-func ObjectPutUrls(c *fiber.Ctx) error {
+func ObjectUrls(c *fiber.Ctx) error {
 	body := ObjectSlice{}
 	err := c.BodyParser(&body)
 	if err != nil {
