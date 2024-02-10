@@ -14,7 +14,7 @@ type Object struct {
 	Size         int64  `json:"size"`
 }
 
-type UploadObject struct {
+type GetObjectType struct {
 	Key   string `json:"key"`
 	Token string `json:"token"`
 }
@@ -45,40 +45,32 @@ func GetObjects(c *fiber.Ctx) error {
 	return c.JSON(objects)
 }
 
+func UploadChecks(token string) error {
+	size, err1 := database.BucketSize()
+	size2, err2 := database.BucketPrefixSize(token + "/")
+	if err1 != nil || err2 != nil {
+		return fiber.ErrInternalServerError
+	} else if size >= Cfg.MaxBucketSize || size2 >= Cfg.MaxFolderSize {
+		return fiber.ErrInsufficientStorage
+	}
+	return nil
+}
+
 func ObjectUrl(c *fiber.Ctx) error {
-	urlType := c.Query("type")
-	body := UploadObject{}
-	err := c.BodyParser(&body)
+	key := c.Query("key")
+	token := c.Query("token")
+	if key == "" || token == "" {
+		return fiber.ErrBadRequest
+	}
+	err := UploadChecks(token)
 	if err != nil {
 		return err
 	}
-	if urlType == "" || body.Key == "" || body.Token == "" {
-		return fiber.ErrBadRequest
+	url, err := database.ObjectGetUrl(token + "/" + key)
+	if err != nil {
+		return fiber.ErrInternalServerError
 	}
-	switch urlType {
-	case "GET":
-		url, err := database.ObjectGetUrl(body.Token + "/" + body.Key)
-		if err != nil {
-			return fiber.ErrInternalServerError
-		}
-		return c.JSON(fiber.Map{"url": url})
-	case "PUT":
-		size, err1 := database.BucketSize()
-		size2, err2 := database.BucketPrefixSize(body.Token + "/")
-		if err1 != nil || err2 != nil {
-			return fiber.ErrInternalServerError
-		}
-		if size >= Cfg.MaxBucketSize || size2 >= Cfg.MaxFolderSize {
-			return fiber.ErrInsufficientStorage
-		}
-		url, err := database.ObjectPutUrl(body.Token + "/" + body.Key)
-		if err != nil {
-			return fiber.ErrInternalServerError
-		}
-		return c.JSON(fiber.Map{"url": url})
-	default:
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "Type not allowed"})
-	}
+	return c.JSON(fiber.Map{"url": url})
 }
 
 func ObjectUrls(c *fiber.Ctx) error {
