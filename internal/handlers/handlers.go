@@ -27,7 +27,7 @@ type ObjectKey struct {
 	Key string `json:"key"`
 }
 
-type ObjectSlice []ObjectKey
+type ObjectKeySlice []ObjectKey
 
 func GetObjects(c *fiber.Ctx) error {
 	token := c.Query("token")
@@ -74,13 +74,17 @@ func ObjectUrl(c *fiber.Ctx) error {
 }
 
 func ObjectUrls(c *fiber.Ctx) error {
-	body := ObjectSlice{}
+	body := ObjectKeySlice{}
 	err := c.BodyParser(&body)
 	if err != nil {
 		return err
 	}
 	urls := make([]ObjectUrlType, len(body))
 	for i, object := range body {
+		err := UploadChecks(object.Key)
+		if err != nil {
+			return err
+		}
 		url, err := database.ObjectPutUrl(object.Key)
 		if err != nil {
 			return fiber.ErrInternalServerError
@@ -103,7 +107,7 @@ func DeleteObject(c *fiber.Ctx) error {
 }
 
 func DeleteObjects(c *fiber.Ctx) error {
-	body := ObjectSlice{}
+	body := ObjectKeySlice{}
 	err := c.BodyParser(&body)
 	if err != nil {
 		return err
