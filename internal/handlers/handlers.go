@@ -5,6 +5,9 @@ import (
 
 	. "vault-server/cmd/config"
 
+	"crypto/rand"
+	"encoding/hex"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -43,6 +46,19 @@ func GetObjects(c *fiber.Ctx) error {
 		objects[i] = Object{Key: *object.Key, LastModified: object.LastModified.String(), Size: *object.Size}
 	}
 	return c.JSON(objects)
+}
+
+func GenerateSecureToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
+func GetToken(c *fiber.Ctx) error {
+	token := GenerateSecureToken(2)
+	return c.JSON(fiber.Map{"token": token})
 }
 
 func UploadChecks(token string) error {
